@@ -1,0 +1,36 @@
+# Byte-compiled / optimized Python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Python virtual environment
+venv/
+env/
+*.env
+
+# IDE-specific files
+.idea/
+.vscode/
+
+# Logs and databases
+*.log
+*.sqlite
+*.db
+
+# Compiled Python bytecode
+__pycache__/
+
+# Distribution/dist folder
+dist/
+build/
+
+# Compiled extensions
+*.so
+*.pyc
+
+# Backup files
+*~
+
+# macOS system files
+.DS_Store
