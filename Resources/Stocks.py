@@ -75,7 +75,7 @@ def add_stocks():
         elif type == Decrement and stocks < 0:
             decr_data = Stock(body)
             decr_data.update_in_db()
-            data = Stock.find_by_product_type(product_type)
+            data = Stock.find_by_id(_id)
             if data.get("stocks") <= 0:
                 Stock.delete_by_id(data.get("_id"))
 

@@ -6,17 +6,20 @@ class Stock(object):
         self._id = str(data.get("_id"))
         self.stocks = int(data.get("stocks"))
         self.product_type = data.get("product_type")
+        self.manufacturing_date = data.get("manufacturing_date")
         self.expdate = data.get("expdate")
-        self.date = str(datetime.utcnow())
+        self.create_at = str(datetime.utcnow())
 
     def save_to_db(self):
         db.stocks.update_one(
             {"_id": self._id},
             {
                 "$set": {
-                    "date": self.date,
                     "product_type": self.product_type,
-                    "expdate": self.expdate
+                    "expdate": self.expdate,
+                    "manufacturing_date": self.manufacturing_date,
+                    "created_at": self.create_at,
+
                 },
                 "$inc": {"stocks": self.stocks}
             },
@@ -28,7 +31,6 @@ class Stock(object):
             {"_id": self._id},
             {
                 "$set": {
-                    "date": self.date,
                     "product_type": self.product_type,
                     "expdate" : self.expdate
                 },
