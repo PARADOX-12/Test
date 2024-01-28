@@ -1,11 +1,10 @@
-from flask import jsonify,request,Blueprint
+from flask import jsonify, request, Blueprint
 from Models.Stock import Stock
 
 Decrement = 'decrement'
 Increment = 'increment'
-MAX_REQ_SIZE = 20
 
-stocks = Blueprint("stocks",__name__)
+stocks = Blueprint("stocks", __name__)
 
 
 @stocks.route('/stockapi/stocks', methods=['POST'])
@@ -20,9 +19,26 @@ def add_stocks():
                 "status": 400
             }), 400
 
-        type= body.get("type")
-        stocks= body.get("stocks")
-        product_type= body.get("product_type")
+        _id = body.get("_id")
+        type = body.get("type")
+        stocks = body.get("stocks")
+        product_type = body.get("product_type")
+
+        if not _id:
+            return jsonify({
+                "description": "Missing _id",
+                "error": "Missing _id",
+                "status": 400
+            }), 400
+
+        check_id = Stock.find_by_id(_id)
+
+        if check_id:
+            if type == Increment and stocks > 0:
+                return jsonify({
+                    "Message": "Increment cannot be performed with the same id",
+                    "status": 403
+                }), 403
 
         if not type:
             return jsonify({
@@ -31,13 +47,13 @@ def add_stocks():
                 "status": 400
             }), 400
 
-        check_stock = Stock.find_by_product_type(product_type)
+        check_stock = Stock.find_by_id(_id)
 
         if not check_stock:
-            if type == Decrement:
+            if type == Decrement and stocks < 0:
                 return jsonify({
-                    "description": "Decrement cannot be Performed",
-                    "error": "Decrement cannot be performed",
+                    "description": "No data found for Decrement",
+                    "error": "No data found for Decrement",
                     "status": 403
                 }), 403
 
@@ -48,7 +64,7 @@ def add_stocks():
                 "status": 400
             }), 400
 
-        if type == Increment:
+        if type == Increment and stocks > 0:
             del body['type']
             data = Stock(body)
             data.save_to_db()
@@ -56,22 +72,26 @@ def add_stocks():
                             "status": 201
                             }), 201
 
-        elif type == Decrement:
+        elif type == Decrement and stocks < 0:
             decr_data = Stock(body)
             decr_data.update_in_db()
-            return jsonify({"Message": " Decremented successfully",
+            data = Stock.find_by_product_type(product_type)
+            if data.get("stocks") <= 0:
+                Stock.delete_by_id(data.get("_id"))
+
+            return jsonify({"Message": "Decremented successfully",
                             "status": 201
                             }), 201
 
         return jsonify({"Message": "Error occurred ",
-                        "Error" : "Error occurred ",
+                        "Error": "Error occurred ",
                         "status": 400
                         }), 400
 
     except Exception as e:
         return jsonify({
             "Message": str(e)
-        }),500
+        }), 500
 
 
 @stocks.route('/stockapi/<string:product_type>', methods=['GET'])
@@ -91,4 +111,4 @@ def decrement_stocks(product_type):
     except Exception as e:
         return jsonify({
             "Message": str(e)
-        }),500
+        }), 500

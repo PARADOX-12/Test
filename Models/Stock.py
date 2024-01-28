@@ -1,4 +1,3 @@
-from bson.objectid import ObjectId
 from db import db
 from datetime import datetime
 
@@ -7,14 +6,17 @@ class Stock(object):
         self._id = str(data.get("_id"))
         self.stocks = int(data.get("stocks"))
         self.product_type = data.get("product_type")
+        self.expdate = data.get("expdate")
         self.date = str(datetime.utcnow())
 
     def save_to_db(self):
         db.stocks.update_one(
-            {"product_type": self.product_type},
+            {"_id": self._id},
             {
                 "$set": {
-                    "date": self.date
+                    "date": self.date,
+                    "product_type": self.product_type,
+                    "expdate": self.expdate
                 },
                 "$inc": {"stocks": self.stocks}
             },
@@ -23,10 +25,12 @@ class Stock(object):
 
     def update_in_db(self):
         db.stocks.update_one(
-            {"product_type": self.product_type},
+            {"_id": self._id},
             {
                 "$set": {
-                    "date": self.date
+                    "date": self.date,
+                    "product_type": self.product_type,
+                    "expdate" : self.expdate
                 },
                 "$inc": {"stocks": self.stocks}
             },
@@ -39,3 +43,14 @@ class Stock(object):
             return Stock(db.stocks.find_one({"product_type": product_type})).__dict__
         return None
 
+    @classmethod
+    def find_by_id(cls,_id):
+        if db.stocks.find_one({"_id": _id}):
+            return Stock(db.stocks.find_one({"_id": _id})).__dict__
+        return None
+
+    @classmethod
+    def delete_by_id(cls, _id):
+        if db.stocks.find_one({"_id": _id}):
+            return db.stocks.delete_one({"_id": _id})
+        return None
