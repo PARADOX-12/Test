@@ -1,13 +1,15 @@
-from flask import jsonify, request, Blueprint
+from flask import jsonify,request,Blueprint
+from flask_jwt_extended import jwt_required
 from Models.Stock import Stock
 
 Decrement = 'decrement'
 Increment = 'increment'
 
-stocks = Blueprint("stocks", __name__)
+stocks = Blueprint("stocks",__name__)
 
 
 @stocks.route('/stockapi/stocks', methods=['POST'])
+@jwt_required()
 def add_stocks():
     try:
         body = request.get_json()
@@ -18,11 +20,11 @@ def add_stocks():
                 "error": "Missing DATA in request",
                 "status": 400
             }), 400
-
+        
         _id = body.get("_id")
-        type = body.get("type")
-        stocks = body.get("stocks")
-        product_type = body.get("product_type")
+        type= body.get("type")
+        stocks= body.get("stocks")
+        product_type= body.get("product_type")
 
         if not _id:
             return jsonify({
@@ -84,17 +86,18 @@ def add_stocks():
                             }), 201
 
         return jsonify({"Message": "Error occurred ",
-                        "Error": "Error occurred ",
+                        "Error" : "Error occurred ",
                         "status": 400
                         }), 400
 
     except Exception as e:
         return jsonify({
             "Message": str(e)
-        }), 500
+        }),500
 
 
 @stocks.route('/stockapi/<string:product_type>', methods=['GET'])
+@jwt_required()
 def decrement_stocks(product_type):
     try:
         data = Stock.find_by_product_type(product_type)
@@ -111,4 +114,4 @@ def decrement_stocks(product_type):
     except Exception as e:
         return jsonify({
             "Message": str(e)
-        }), 500
+        }),500
